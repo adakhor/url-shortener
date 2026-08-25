@@ -1,11 +1,35 @@
 import { createUrl } from "../repositories/url.repository.js";
+import { generateShortCode } from "../utils/short-code.js";
+
+const MAX_ATTEMPTS = 5;
 
 export async function shortenUrl(originalUrl: string) {
-  const shortCode = Math.random()
-    .toString(36)
-    .slice(2, 8);
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    const shortCode = generateShortCode();
 
-  const url = await createUrl(shortCode, originalUrl);
+    try {
+      return await createUrl(shortCode, originalUrl);
+    } catch (error: unknown) {
+      // PostgreSQL error code 23505 означает нарушение UNIQUE constraint.
+      // В нашем случае это может быть занятый shortCode, поэтому
+      // генерируем новый код и повторяем INSERT.
+      if (isUniqueViolation(error)) {
+        continue;
+      }
 
-  return url;
+      // Любая другая ошибка БД не связана с коллизией —
+      // её нельзя молча игнорировать.
+      throw error;
+    }
+  }
+
+  throw new Error("Failed to generate a unique short code");
+}
+
+function isUniqueViolation(error: unknown): boolean {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  return "code" in error && error.code === "23505";
 }
