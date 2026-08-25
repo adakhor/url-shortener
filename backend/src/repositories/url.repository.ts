@@ -15,3 +15,27 @@ export async function createUrl(
 
   return result.rows[0];
 }
+
+export async function findUrlByShortCode(shortCode: string) {
+  const result = await pool.query(
+    `
+      SELECT *
+      FROM urls
+      WHERE short_code = $1
+    `,
+    [shortCode],
+  );
+
+  return result.rows[0];
+}
+
+export async function incrementClicks(shortCode: string) {
+  await pool.query(
+    `
+      UPDATE urls
+      SET clicks = clicks + 1
+      WHERE short_code = $1
+    `,
+    [shortCode],
+  );
+}

@@ -1,4 +1,8 @@
-import { createUrl } from "../repositories/url.repository.js";
+import {
+  createUrl,
+  findUrlByShortCode,
+  incrementClicks,
+} from "../repositories/url.repository.js";
 import { generateShortCode } from "../utils/short-code.js";
 
 const MAX_ATTEMPTS = 5;
@@ -32,4 +36,16 @@ function isUniqueViolation(error: unknown): boolean {
   }
 
   return "code" in error && error.code === "23505";
+}
+
+export async function resolveShortUrl(shortCode: string) {
+  const url = await findUrlByShortCode(shortCode);
+
+  if (!url) {
+    return null;
+  }
+
+  await incrementClicks(shortCode);
+
+  return url;
 }

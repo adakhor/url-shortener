@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import { pool } from "./database/pool.js";
 import { shortenUrlController } from "./controllers/url.controller.js";
+import { redirectController } from "./controllers/redirect.controller.js";
 
 const app = express();
 
@@ -12,6 +13,8 @@ app.get("/", (req, res) => {
 });
 
 app.post("/api/shorten", shortenUrlController);
+
+app.get("/:shortCode", redirectController);
 
 app.listen(3000, async () => {
   console.log("Server started on http://localhost:3000");
