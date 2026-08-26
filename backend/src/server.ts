@@ -5,8 +5,13 @@ import { shortenUrlController } from "./controllers/url.controller.js";
 import { redirectController } from "./controllers/redirect.controller.js";
 import { redisClient } from "./database/redis.js";
 import { statsController } from "./controllers/stats.controller.js";
+import { errorHandler } from "./middleware/error-handler.js";
+import morgan from "morgan";
 
 const app = express();
+
+// Логируем каждый HTTP-запрос: метод, URL, статус и время выполнения.
+app.use(morgan("dev"));
 
 app.use(express.json());
 
@@ -19,6 +24,8 @@ app.post("/api/shorten", shortenUrlController);
 app.get("/api/stats/:shortCode", statsController);
 
 app.get("/:shortCode", redirectController);
+
+app.use(errorHandler);
 
 app.listen(3000, async () => {
   console.log("Server started on http://localhost:3000");
