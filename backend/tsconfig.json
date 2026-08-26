@@ -3,18 +3,19 @@
     "target": "ES2022",
     "module": "NodeNext",
 
-    "rootDir": "./src",
+    "rootDir": ".",
     "outDir": "./dist",
 
-    "types": ["node"],
+    "types": ["node", "jest"],
 
     "sourceMap": true,
 
     "strict": true,
+    "isolatedModules": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
 
     "skipLibCheck": true
   },
-  "include": ["src"]
+  "include": ["src", "tests"]
 }

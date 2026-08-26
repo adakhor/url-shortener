@@ -1,3 +1,4 @@
+import "../config/env.js";
 import { createClient } from "redis";
 
 export const redisClient = createClient({

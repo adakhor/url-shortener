@@ -1,47 +1,26 @@
-import "dotenv/config";
-import express from "express";
+import { app } from "./app.js";
 import { pool } from "./database/pool.js";
-import { shortenUrlController } from "./controllers/url.controller.js";
-import { redirectController } from "./controllers/redirect.controller.js";
 import { redisClient } from "./database/redis.js";
-import { statsController } from "./controllers/stats.controller.js";
-import { errorHandler } from "./middleware/error-handler.js";
-import morgan from "morgan";
 
-const app = express();
+const PORT = 3000;
 
-// Логируем каждый HTTP-запрос: метод, URL, статус и время выполнения.
-app.use(morgan("dev"));
-
-app.use(express.json());
-
-app.get("/", (req, res) => {
-  res.send("URL Shortener API");
-});
-
-app.post("/api/shorten", shortenUrlController);
-
-app.get("/api/stats/:shortCode", statsController);
-
-app.get("/:shortCode", redirectController);
-
-app.use(errorHandler);
-
-app.listen(3000, async () => {
-  console.log("Server started on http://localhost:3000");
-
+async function startServer() {
   try {
     await pool.query("SELECT 1");
     console.log("PostgreSQL connection successful");
-  } catch (error) {
-    console.error("PostgreSQL connection failed:", error);
-  }
 
-  try {
     await redisClient.connect();
     console.log("Redis connection successful");
-  } catch (error) {
-    console.error("Redis connection failed:", error);
-  }
-});
 
+    app.listen(PORT, () => {
+      console.log(
+        `Server started on http://localhost:${PORT}`,
+      );
+    });
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  }
+}
+
+startServer();
