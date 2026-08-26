@@ -3,6 +3,7 @@ import express from "express";
 import { pool } from "./database/pool.js";
 import { shortenUrlController } from "./controllers/url.controller.js";
 import { redirectController } from "./controllers/redirect.controller.js";
+import { redisClient } from "./database/redis.js";
 
 const app = express();
 
@@ -24,5 +25,12 @@ app.listen(3000, async () => {
     console.log("PostgreSQL connection successful");
   } catch (error) {
     console.error("PostgreSQL connection failed:", error);
+  }
+
+  try {
+    await redisClient.connect();
+    console.log("Redis connection successful");
+  } catch (error) {
+    console.error("Redis connection failed:", error);
   }
 });

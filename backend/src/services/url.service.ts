@@ -4,6 +4,10 @@ import {
   incrementClicks,
 } from "../repositories/url.repository.js";
 import { generateShortCode } from "../utils/short-code.js";
+import {
+  getCachedUrl,
+  cacheUrl,
+} from "./cache.service.js";
 
 const MAX_ATTEMPTS = 5;
 
@@ -39,11 +43,28 @@ function isUniqueViolation(error: unknown): boolean {
 }
 
 export async function resolveShortUrl(shortCode: string) {
+  const cachedUrl = await getCachedUrl(shortCode);
+
+  if (cachedUrl) {
+    // URL уже есть в Redis, поэтому PostgreSQL не нужен
+    // для поиска originalUrl. Но clicks всё равно храним
+    // в PostgreSQL, чтобы статистика оставалась постоянной.
+    await incrementClicks(shortCode);
+
+    return {
+      original_url: cachedUrl,
+    };
+  }
+
   const url = await findUrlByShortCode(shortCode);
 
   if (!url) {
     return null;
   }
+
+  // Первый запрос: получили URL из PostgreSQL и положили
+  // его в Redis на один час для последующих запросов.
+  await cacheUrl(shortCode, url.original_url);
 
   await incrementClicks(shortCode);
 
