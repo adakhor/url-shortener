@@ -4,6 +4,7 @@ import { pool } from "./database/pool.js";
 import { shortenUrlController } from "./controllers/url.controller.js";
 import { redirectController } from "./controllers/redirect.controller.js";
 import { redisClient } from "./database/redis.js";
+import { statsController } from "./controllers/stats.controller.js";
 
 const app = express();
 
@@ -14,6 +15,8 @@ app.get("/", (req, res) => {
 });
 
 app.post("/api/shorten", shortenUrlController);
+
+app.get("/api/stats/:shortCode", statsController);
 
 app.get("/:shortCode", redirectController);
 
@@ -34,3 +37,4 @@ app.listen(3000, async () => {
     console.error("Redis connection failed:", error);
   }
 });
+

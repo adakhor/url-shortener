@@ -70,3 +70,7 @@ export async function resolveShortUrl(shortCode: string) {
 
   return url;
 }
+
+export async function getUrlStats(shortCode: string) {
+  return findUrlByShortCode(shortCode);
+}
